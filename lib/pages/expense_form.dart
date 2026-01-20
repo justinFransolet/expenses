@@ -76,11 +76,11 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
               // Title field (validation non vide)
               TextFormField(
                 controller: _titleController,
-                decoration: const InputDecoration(labelText: 'Titre'),
+                decoration: const InputDecoration(labelText: 'Title'),
                 textInputAction: TextInputAction.next,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Le titre ne peut pas être vide';
+                    return 'Not empty';
                   }
                   return null;
                 },
@@ -89,20 +89,20 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
               // Amount field (validation nombre valide > 0)
               TextFormField(
                 controller: _amountController,
-                decoration: const InputDecoration(labelText: 'Montant'),
+                decoration: const InputDecoration(labelText: 'Amount'),
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 textInputAction: TextInputAction.next,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Le montant est requis';
+                    return 'Need amount';
                   }
                   final normalized = value.replaceAll(',', '.');
                   final parsed = double.tryParse(normalized);
                   if (parsed == null) {
-                    return 'Entrez un nombre valide';
+                    return 'Not a number';
                   }
                   if (parsed <= 0) {
-                    return 'Le montant doit être supérieur à 0';
+                    return 'Not negative';
                   }
                   return null;
                 },
@@ -111,7 +111,7 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
               // Category selection
               DropdownButtonFormField<Category>(
                 value: _selectedCategory,
-                decoration: const InputDecoration(labelText: 'Catégorie'),
+                decoration: const InputDecoration(),
                 items: Category.values.map((c) {
                   return DropdownMenuItem<Category>(
                     value: c,
