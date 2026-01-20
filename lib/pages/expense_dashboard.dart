@@ -90,8 +90,6 @@ class _ExpenseDashboardState extends State<ExpenseDashboard> {
     );
   }
 
-  // TODO: implement expense total card with currency conversion
-  // Don't forget to handle aysnchronous loading of exchange rate.
   Widget _buildSummaryCard() {
     final total = _expenses.fold<double>(0.0, (sum, e) => sum + e.amount);
 
