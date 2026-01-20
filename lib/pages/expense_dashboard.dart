@@ -186,10 +186,30 @@ class _ExpenseDashboardState extends State<ExpenseDashboard> {
             color: Colors.redAccent,
             alignment: Alignment.centerRight,
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: const Icon(Icons.delete, color: Colors.white),
+            child: const Row(
+              children: [
+                Spacer(),
+                Text("Delete", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                SizedBox(width: 8),
+                Icon(Icons.delete, color: Colors.white),
+              ],
+            )
           ),
           child: ListTile(
-            leading: Icon(expense.category.icon),
+            leading: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor.withOpacity(0.12),
+                shape: BoxShape.circle,
+              ),
+              alignment: Alignment.center,
+              child: Icon(
+                expense.category.icon,
+                color: Theme.of(context).primaryColor,
+                size: 20,
+              ),
+            ),
             title: Text(expense.title),
             subtitle: Text(expense.category.label),
             trailing: Text('${expense.amount.toStringAsFixed(2)} €'),
