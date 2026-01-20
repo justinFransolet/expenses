@@ -103,10 +103,9 @@ class _ExpenseDashboardState extends State<ExpenseDashboard> {
           future: _rate,
           builder: (context, snapshot) {
             return Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween, // Aligne aux extrémités
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Partie Gauche : Libellé et Montant
-                Flexible( // Utilise Flexible au lieu de Expanded pour éviter de forcer la largeur
+                Flexible(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
@@ -118,7 +117,6 @@ class _ExpenseDashboardState extends State<ExpenseDashboard> {
                   ),
                 ),
 
-                // Partie Droite : Sélecteur de devise
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   decoration: BoxDecoration(

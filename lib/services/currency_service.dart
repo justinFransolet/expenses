@@ -14,9 +14,8 @@ class CurrencyService {
     if (base.toUpperCase() == target.toUpperCase()) return 1.0;
 
     // Get the exchange rate from the API
-    final uri = Uri.https(_baseUrl, '/latest', {
-      'from': base.toUpperCase(),
-      'to': target.toUpperCase(),
+    final uri = Uri.https(_baseUrl, '/v1/latest', {
+      'base': base.toUpperCase(),
     });
 
     try {
