@@ -17,21 +17,33 @@ class ExpenseDashboard extends StatefulWidget {
 class _ExpenseDashboardState extends State<ExpenseDashboard> {
   late Future<List<Expense>> _expensesFuture;
   List<Expense> _expenses = [];
+  bool _isLoading = false;
+  String? _errorMessage;
   // Default to 1.0 for €
   Future<double> _rate = Future.sync(() => 1.0);
 
   @override
   void initState() {
     super.initState();
-    // TODO: remove dummy initialization of _expenses and initialize _expensesFuture from database instead
-    _expenses = [
-      Expense(title: "Bogus expense 1", amount: 10.0, category: Category.food),
-      Expense(
-        title: "Bogus expense 2",
-        amount: 20.0,
-        category: Category.transport,
-      ),
-    ];
+    _loadAllExpenses();
+  }
+
+  void _loadAllExpenses() {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    DatabaseHelper.instance.readAllExpenses().then((list) {
+      setState(() {
+        _expenses = list;
+        _isLoading = false;
+      });
+    }).catchError((e) {
+      setState(() {
+        _errorMessage = 'Erreur lors du chargement';
+        _isLoading = false;
+      });
+    });
   }
 
   @override
@@ -73,14 +85,50 @@ class _ExpenseDashboardState extends State<ExpenseDashboard> {
   Widget _buildExpenseList() {
     // TODO: implement expense deletion by swiping list item to the left
     // TODO: implement expense edition by tapping on a list item (using a named route)
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_errorMessage != null) {
+      return Center(child: Text(_errorMessage!));
+    }
+    if (_expenses.isEmpty) {
+      return const Center(child: Text('Aucune dépense'));
+    }
     return ListView.builder(
       itemCount: _expenses.length,
       itemBuilder: (context, index) {
         final expense = _expenses[index];
-        return ListTile(
-          // TODO: add category
-          title: Text(expense.title),
-          trailing: Text('${expense.amount.toStringAsFixed(2)} €'),
+        return Dismissible(
+          key: ValueKey(expense.id ?? index),
+          direction: DismissDirection.startToEnd,
+          onDismissed: (_) async {
+            if (expense.id != null) {
+              await DatabaseHelper.instance.delete(expense.id!);
+            }
+            setState(() {
+              _expenses.removeAt(index);
+            });
+          },
+          background: Container(
+            color: Colors.redAccent,
+            alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: const Icon(Icons.delete, color: Colors.white),
+          ),
+          child: ListTile(
+            // TODO: add category
+            leading: Icon(expense.category.icon),
+            title: Text(expense.title),
+            subtitle: Text(expense.category.label),
+            trailing: Text('${expense.amount.toStringAsFixed(2)} €'),
+            onTap: () async {
+              final updated = await Navigator.pushNamed(context, '/expense', arguments: expense);
+              if (updated != null && updated is Expense) {
+                await DatabaseHelper.instance.update(updated);
+                _loadAllExpenses();
+              }
+            },
+          ),
         );
       },
     );
