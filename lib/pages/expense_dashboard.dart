@@ -25,7 +25,9 @@ class _ExpenseDashboardState extends State<ExpenseDashboard> {
   @override
   void initState() {
     super.initState();
-    _loadAllExpenses();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadAllExpenses();
+    });
   }
 
   void _loadAllExpenses() {
@@ -50,7 +52,6 @@ class _ExpenseDashboardState extends State<ExpenseDashboard> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Expenses')),
-      // TODO: handle loading, errors, and initialize _expenses from _expensesFuture
       body: Column(
         children: [
           _buildSummaryCard(), // Total sum display
@@ -83,8 +84,6 @@ class _ExpenseDashboardState extends State<ExpenseDashboard> {
   }
 
   Widget _buildExpenseList() {
-    // TODO: implement expense deletion by swiping list item to the left
-    // TODO: implement expense edition by tapping on a list item (using a named route)
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -100,7 +99,7 @@ class _ExpenseDashboardState extends State<ExpenseDashboard> {
         final expense = _expenses[index];
         return Dismissible(
           key: ValueKey(expense.id ?? index),
-          direction: DismissDirection.startToEnd,
+          direction: DismissDirection.endToStart,
           onDismissed: (_) async {
             if (expense.id != null) {
               await DatabaseHelper.instance.delete(expense.id!);
@@ -111,12 +110,11 @@ class _ExpenseDashboardState extends State<ExpenseDashboard> {
           },
           background: Container(
             color: Colors.redAccent,
-            alignment: Alignment.centerLeft,
+            alignment: Alignment.centerRight,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: const Icon(Icons.delete, color: Colors.white),
           ),
           child: ListTile(
-            // TODO: add category
             leading: Icon(expense.category.icon),
             title: Text(expense.title),
             subtitle: Text(expense.category.label),
