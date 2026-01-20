@@ -27,8 +27,6 @@ class _ExpenseDashboardState extends State<ExpenseDashboard> {
   ];
 
   late String _selectedCurrencyCode;
-  String get _selectedCurrencySymbol =>
-      _availableCurrencies.firstWhere((c) => c['code'] == _selectedCurrencyCode)['symbol']!;
 
   late Future<double> _rate;
 
@@ -54,7 +52,7 @@ class _ExpenseDashboardState extends State<ExpenseDashboard> {
       });
     }).catchError((e) {
       setState(() {
-        _errorMessage = 'Erreur lors du chargement';
+        _errorMessage = 'Load error: $e';
         _isLoading = false;
       });
     });
@@ -104,11 +102,9 @@ class _ExpenseDashboardState extends State<ExpenseDashboard> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Flexible(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
+                  child: Row(
                     children: [
-                      const Text('Total dépensé', style: TextStyle(color: Colors.grey)),
+                      const Text('Total Expenses: '),
                       const SizedBox(height: 4),
                       _buildConvertedAmount(snapshot, total),
                     ],
@@ -155,8 +151,8 @@ class _ExpenseDashboardState extends State<ExpenseDashboard> {
     final converted = (total * rate).toStringAsFixed(2);
 
     return Text(
-      '$converted $_selectedCurrencySymbol',
-      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+      converted,
+      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
       overflow: TextOverflow.ellipsis, // anti-overflow
     );
   }
