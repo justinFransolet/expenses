@@ -2,6 +2,7 @@ import 'package:expenses/models/category.dart';
 import 'package:expenses/models/expense.dart';
 import 'package:expenses/viewmodels/category_icon.dart';
 import 'package:flutter/material.dart';
+import '../services/database_helper.dart';
 
 /// Form page for creating or editing an expense.
 class ExpenseFormPage extends StatefulWidget {
@@ -39,18 +40,26 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
     super.dispose();
   }
 
-  void _saveForm() {
+  Future<void> _saveForm() async {
     if (_formKey.currentState!.validate()) {
-      // Create a new Expense object (preserving the ID if editing)
+      final normalized = _amountController.text.replaceAll(',', '.');
+      final parsed = double.tryParse(normalized) ?? 0.0;
+
       final updatedExpense = Expense(
         id: widget.expense?.id,
-        title: _titleController.text,
-        amount: double.parse(_amountController.text),
+        title: _titleController.text.trim(),
+        amount: parsed,
         category: _selectedCategory,
       );
 
-      // Return the object to the previous screen
-      Navigator.pop(context, updatedExpense);
+      try {
+        await DatabaseHelper.instance.save(updatedExpense);
+        Navigator.pop(context, updatedExpense);
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Erreur lors de la sauvegarde')),
+        );
+      }
     }
   }
 

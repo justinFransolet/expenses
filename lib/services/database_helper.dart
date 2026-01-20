@@ -1,4 +1,5 @@
 import 'package:expenses/models/expense.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -22,24 +23,55 @@ class DatabaseHelper {
   }
 
   Future _createDB(Database db, int version) async {
-    // TODO: Create expenses table (with id as autoincrement primary key, and all fields non-nullable)
+    await db.execute('''
+      CREATE TABLE expenses (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        amount REAL NOT NULL,
+        category INTEGER NOT NULL
+      )
+    ''');
   }
 
-  Future<int> create(Expense expense) async {
+  Future<void> create(Expense expense) async {
+    debugPrint('Inserting expense: ${expense.toMap()}');
     final db = await instance.database;
-    return db.insert('expenses', expense.toMap());
+    await db.insert('expenses', expense.toMap());
   }
 
   Future<void> delete(int i) async {
-    // TODO: implement delete method
+    final db = await instance.database;
+    await db.delete(
+      'expenses',
+      where: 'id = ?',
+      whereArgs: [i],
+    );
   }
 
   Future<List<Expense>> readAllExpenses() async {
-    // TODO: read all expenses from the database
-    return [];
+    final db = await instance.database;
+    final maps = await db.query('expenses');
+    return maps.map((m) => Expense.fromMap(m)).toList();
   }
 
   Future<void> update(Expense expense) async {
-    // TODO: update expense
+    if (expense.id == null) {
+      throw ArgumentError('Cannot update an expense without an id.');
+    }
+    final db = await instance.database;
+    final values = Map<String, dynamic>.from(expense.toMap())..remove('id');
+    await db.update(
+      'expenses',
+      values,
+      where: 'id = ?',
+      whereArgs: [expense.id],
+    );
+  }
+
+  Future<void> save(Expense expense) async {
+    if (expense.id == null) {
+      await create(expense);
+    }
+    await update(expense);
   }
 }
