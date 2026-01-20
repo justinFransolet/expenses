@@ -31,14 +31,21 @@ class Expense {
     };
   }
 
-  /// Convert a Map into an Expense.
   factory Expense.fromMap(Map<String, dynamic> map) {
+    final catRaw = map['category'];
+
+    Category category;
+    if (catRaw >= 0 && catRaw < Category.values.length) {
+      category = Category.values[catRaw];
+    } else {
+      category = Category.food;
+    }
+
     return Expense(
-      id: map['id'],
-      title: map['title'],
+      id: map['id'] as int?,
+      title: map['title'] as String? ?? '',
       amount: map['amount'],
-      // TODO: deduce category from index, reverse of toMap operation
-      category: Category.food,
+      category: category,
     );
   }
 }
