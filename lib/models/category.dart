@@ -9,5 +9,5 @@ enum Category {
 extension CategoryLabel on Category {
   /// Get the string representation of the category.
   // TODO: make first letter uppercase
-  String get label => name;
+  String get label => name[0].toUpperCase() + name.substring(1);
 }

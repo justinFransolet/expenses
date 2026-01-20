@@ -26,13 +26,17 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
   @override
   void initState() {
     super.initState();
-    // TODO: initialize controllers with existing data if editing, else empty
-    // TODO: initialize _selectedCategory (default to food if creating new)
+    _titleController = TextEditingController(text: widget.expense != null ? widget.expense!.title : '');
+    _amountController = TextEditingController(text: widget.expense != null ? widget.expense!.amount.toString() : '');
+    _selectedCategory = widget.expense != null ? widget.expense!.category : Category.food;
+
   }
 
   @override
   void dispose() {
-    // TODO: cleanup
+    _titleController.dispose();
+    _amountController.dispose();
+    super.dispose();
   }
 
   void _saveForm() {
@@ -62,11 +66,62 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
           key: _formKey,
           child: ListView(
             children: [
-              // TODO: TextFormField for title (with validation for non-empty)
+              // Title field (validation non vide)
+              TextFormField(
+                controller: _titleController,
+                decoration: const InputDecoration(labelText: 'Titre'),
+                textInputAction: TextInputAction.next,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Le titre ne peut pas être vide';
+                  }
+                  return null;
+                },
+              ),
               const SizedBox(height: 16),
-              // TODO: TextFormField for amount (with validation for valid number)
+              // Amount field (validation nombre valide > 0)
+              TextFormField(
+                controller: _amountController,
+                decoration: const InputDecoration(labelText: 'Montant'),
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                textInputAction: TextInputAction.next,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Le montant est requis';
+                  }
+                  final normalized = value.replaceAll(',', '.');
+                  final parsed = double.tryParse(normalized);
+                  if (parsed == null) {
+                    return 'Entrez un nombre valide';
+                  }
+                  if (parsed <= 0) {
+                    return 'Le montant doit être supérieur à 0';
+                  }
+                  return null;
+                },
+              ),
               const SizedBox(height: 16),
-              // TODO: DropdownButtonFormField for category selection
+              // Category selection
+              DropdownButtonFormField<Category>(
+                value: _selectedCategory,
+                decoration: const InputDecoration(labelText: 'Catégorie'),
+                items: Category.values.map((c) {
+                  return DropdownMenuItem<Category>(
+                    value: c,
+                    child: Row(
+                        children: [
+                          Icon(c.icon),
+                          const SizedBox(width: 8),
+                          Text(c.label),
+                        ],
+                    ),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  if (value == null) return;
+                  setState(() => _selectedCategory = value);
+                },
+              ),
               const SizedBox(height: 32),
               ElevatedButton(
                 onPressed: _saveForm,

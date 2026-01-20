@@ -10,12 +10,32 @@ class ExpensesApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: hide debug banner
-    // TODO: handles routes '/' and '/expense'
     // '/expense' should accept an optional Expense argument for editing
     return MaterialApp(
       theme: ThemeData(primarySwatch: Colors.indigo, useMaterial3: true),
       home: const ExpenseDashboard(),
+      debugShowCheckedModeBanner: false,
+      initialRoute: "/",
+      onGenerateRoute: (RouteSettings settings) {
+        switch (settings.name) {
+          case '/':
+            return MaterialPageRoute<void>(
+              builder: (_) => const ExpenseDashboard(),
+              settings: settings,
+            );
+          case '/expense':
+            final expense = settings.arguments as Expense?;
+            return MaterialPageRoute<void>(
+              builder: (_) => ExpenseFormPage(expense: expense),
+              settings: settings,
+            );
+          default:
+            return MaterialPageRoute<void>(
+              builder: (_) => const ExpenseDashboard(),
+              settings: settings,
+            );
+        }
+      },
     );
   }
 }
