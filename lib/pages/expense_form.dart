@@ -41,26 +41,24 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
   }
 
   Future<void> _saveForm() async {
-    if (_formKey.currentState!.validate()) {
-      final normalized = _amountController.text.replaceAll(',', '.');
-      final parsed = double.tryParse(normalized) ?? 0.0;
+    final normalized = _amountController.text.replaceAll(',', '.');
+    final parsed = double.tryParse(normalized) ?? 0.0;
 
-      final updatedExpense = Expense(
-        id: widget.expense?.id,
-        title: _titleController.text.trim(),
-        amount: parsed,
-        category: _selectedCategory,
-      );
+    final expenseToSave = Expense(
+      id: widget.expense?.id,
+      title: _titleController.text.trim(),
+      amount: parsed,
+      category: _selectedCategory,
+    );
 
-      try {
-        await DatabaseHelper.instance.save(updatedExpense);
-        Navigator.pop(context, updatedExpense);
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Erreur lors de la sauvegarde')),
-        );
-      }
-    }
+    final savedId = await DatabaseHelper.instance.save(expenseToSave);
+    final resultExpense = Expense(
+      id: savedId,
+      title: expenseToSave.title,
+      amount: expenseToSave.amount,
+      category: expenseToSave.category,
+    );
+    Navigator.pop(context, resultExpense);
   }
 
   @override

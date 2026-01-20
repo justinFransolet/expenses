@@ -33,10 +33,12 @@ class DatabaseHelper {
     ''');
   }
 
-  Future<void> create(Expense expense) async {
+  /// Insère et renvoie l'id inséré.
+  Future<int> create(Expense expense) async {
     debugPrint('Inserting expense: ${expense.toMap()}');
     final db = await instance.database;
-    await db.insert('expenses', expense.toMap());
+    final expenseMap = expense.toMap()..remove('id');
+    return await db.insert('expenses', expenseMap);
   }
 
   Future<void> delete(int i) async {
@@ -50,17 +52,18 @@ class DatabaseHelper {
 
   Future<List<Expense>> readAllExpenses() async {
     final db = await instance.database;
-    final maps = await db.query('expenses');
+    final maps = await db.query('expenses', orderBy: 'id DESC');
     return maps.map((m) => Expense.fromMap(m)).toList();
   }
 
-  Future<void> update(Expense expense) async {
+  /// Met à jour et renvoie le nombre de lignes affectées.
+  Future<int> update(Expense expense) async {
     if (expense.id == null) {
       throw ArgumentError('Cannot update an expense without an id.');
     }
     final db = await instance.database;
     final values = Map<String, dynamic>.from(expense.toMap())..remove('id');
-    await db.update(
+    return await db.update(
       'expenses',
       values,
       where: 'id = ?',
@@ -68,10 +71,17 @@ class DatabaseHelper {
     );
   }
 
-  Future<void> save(Expense expense) async {
+  /// Upsert : insère si `id` est null, sinon tente une update.
+  /// Retourne l'id de la dépense insérée ou l'id existant si update OK.
+  Future<int> save(Expense expense) async {
     if (expense.id == null) {
-      await create(expense);
+      return await create(expense);
     }
-    await update(expense);
+    final updatedCount = await update(expense);
+    if (updatedCount == 0) {
+      // si update n'a rien modifié, insérer et récupérer l'id
+      return await create(expense);
+    }
+    return expense.id!;
   }
 }
