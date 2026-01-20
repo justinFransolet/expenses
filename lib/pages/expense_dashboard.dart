@@ -55,15 +55,14 @@ class _ExpenseDashboardState extends State<ExpenseDashboard> {
       body: Column(
         children: [
           _buildSummaryCard(), // Total sum display
-          // TODO: replace SizedBox with something else to occupy remaining vertical space
-          SizedBox(height: 100, child: _buildExpenseList()), // Expenses list
+          Expanded(child: _buildExpenseList()), // Expenses list
         ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final newExpense = await Navigator.pushNamed(context, '/expense');
           if (newExpense != null && newExpense is Expense) {
-            // TODO: save newExpense to database and refresh this widget
+            _loadAllExpenses();
           }
         },
         child: const Icon(Icons.add),
